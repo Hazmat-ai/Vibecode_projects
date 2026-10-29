@@ -1,0 +1,63 @@
+id: wound-care-basic
+title: Basic Wound Care and Infection Prevention
+domain: medicine
+tags: [medicine, wound, infection, hygiene, first-aid]
+civilization_score: 88
+difficulty: 2
+requires_skills: [water-purification]
+summary: >
+  Proper wound cleaning and dressing prevents infection — the primary killer
+  in pre-antibiotic environments. Clean water, honey, and bandaging can
+  handle most injuries that would otherwise become fatal.
+content: |
+  ## The Priority: Infection Prevention
+
+  In the absence of antibiotics, infection kills more people than the original
+  wound. Any break in the skin is a potential death sentence if not treated.
+
+  ## Cleaning a Wound
+
+  1. **Wash your hands** with clean water and soap (or ash) first.
+  2. **Irrigate with clean water**: Pour large volumes of clean water directly
+     into the wound. Use a syringe, folded leaf funnel, or cupped hands.
+     The goal is physical flushing of debris and bacteria.
+  3. **Remove visible debris** with clean (boiled) tweezers or a clean thorn.
+     Do not probe deep wounds — you may push bacteria deeper.
+  4. **Do not close a dirty wound**: Stitching a contaminated wound traps
+     bacteria. Leave it open to drain. Close only clean wounds within 6 hours.
+
+  ## Dressings
+
+  - **Honey**: Natural antibacterial. Cover wound surface with raw honey,
+    then bandage. Reheat if crystallized. Works on infected wounds too.
+  - **Plantain leaves** (Plantago major): Crushed raw leaf applied directly.
+    Anti-inflammatory, antimicrobial. Found almost everywhere globally.
+  - **Moss**: Dried sphagnum moss is absorbent and mildly antiseptic.
+    Used in WWI field dressings. Pack gently, replace daily.
+  - **Clean cloth**: Boil bandaging material before use.
+
+  ## Signs of Infection (Act Fast)
+
+  - Redness spreading beyond wound edge (red streaks = blood poisoning)
+  - Swelling, warmth, pus
+  - Fever above 38°C / 100.4°F
+  - Odor from wound
+
+  **If infection is spreading**: increase irrigation frequency, apply honey,
+  elevate the limb, and consider debridement (removing dead tissue).
+
+  ## Closure Methods (When Appropriate)
+
+  - **Butterfly strips**: Strips of cloth or tape pulled across a clean cut.
+  - **Sutures**: Only on clean wounds. Use boiled thread, curved needle.
+    Simple interrupted stitch, 1cm apart, not too tight.
+
+  ## See Also
+
+  - water-purification-boiling
+  - herbal-medicine-antiseptics
+  - bone-setting-basics
+sources:
+  - Wilderness Medicine, 7th Edition — Auerbach
+  - Where There Is No Doctor — Hesperian Foundation (free at hesperian.org)
+last_updated: "2024-01-01"

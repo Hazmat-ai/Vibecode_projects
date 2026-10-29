@@ -1,0 +1,11 @@
+id: fire-making
+title: Fire Making
+domain: energy
+civilization_score: 90
+requires: []
+unlocks: [water-purification, food-cooking, charcoal-production, pottery-firing]
+summary: >
+  Ability to reliably create fire using friction, spark, or lens methods
+  without manufactured lighters or matches.
+difficulty: 3
+time_to_learn_days: 30

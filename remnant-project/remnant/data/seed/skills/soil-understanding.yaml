@@ -1,0 +1,11 @@
+id: soil-understanding
+title: Soil Understanding
+domain: food
+civilization_score: 78
+requires: [basic-agriculture]
+unlocks: [crop-rotation, soil-composting, soil-testing]
+summary: >
+  Ability to assess soil quality, texture, drainage, and fertility by
+  observation and simple tests, and to improve it with organic matter.
+difficulty: 2
+time_to_learn_days: 14

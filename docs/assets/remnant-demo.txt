@@ -1,0 +1,31 @@
+REMNANT — actual CLI walkthrough using an isolated temporary database.
+
+$ python3 remnant-project/remnant/main.py library search water
+============================================================
+  Search: 'water'
+============================================================
+  [ 95] Water Purification — Boiling [medicine]
+  [ 90] Fire Making — Friction Methods [energy]
+  [ 88] Basic Wound Care and Infection Prevention [medicine]
+------------------------------------------------------------
+
+$ python3 remnant-project/remnant/main.py community new "Milton Lab"
+[OK] Community 'Milton Lab' created (id: 'milton-lab').
+
+$ python3 remnant-project/remnant/main.py tree next --community milton-lab
+============================================================
+  Unlockable skills for 'Milton Lab'
+============================================================
+  [ 92] Basic Agriculture (food)
+  [ 90] Fire Making (energy)
+------------------------------------------------------------
+
+$ python3 remnant-project/remnant/main.py tree learn --community milton-lab --skill fire-making
+[OK] Community 'milton-lab' learned 'fire-making'.
+
+$ python3 remnant-project/remnant/main.py tree path --community milton-lab --skill water-purification
+============================================================
+  Path to unlock 'water-purification'
+============================================================
+  [ 95] Water Purification (medicine)
+------------------------------------------------------------

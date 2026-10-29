@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+.venv/
+test-results/
+playwright-report/
+.DS_Store

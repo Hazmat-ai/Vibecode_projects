@@ -1,0 +1,11 @@
+id: basic-agriculture
+title: Basic Agriculture
+domain: food
+civilization_score: 92
+requires: []
+unlocks: [crop-rotation, seed-saving, irrigation-basics, soil-composting]
+summary: >
+  Planting, tending, and harvesting food crops. Covers soil preparation,
+  seed selection, spacing, watering, and seasonal timing for a productive garden.
+difficulty: 2
+time_to_learn_days: 90

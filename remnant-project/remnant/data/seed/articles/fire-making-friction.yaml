@@ -1,0 +1,63 @@
+id: fire-making-friction
+title: Fire Making — Friction Methods
+domain: energy
+tags: [fire, survival, shelter, cooking, primitive-technology]
+civilization_score: 90
+difficulty: 3
+requires_skills: []
+summary: >
+  Friction-based fire starting is the most universally applicable no-tool
+  method. The bow drill and hand drill techniques can produce an ember
+  from dry wood with no manufactured equipment.
+content: |
+  ## Why This Matters
+
+  Fire is the foundation of warmth, cooked food, water purification, and
+  metalworking. Without a reliable ignition method, none of these are accessible.
+
+  ## Bow Drill Method
+
+  **Materials:**
+  - Fireboard: dry, soft wood (willow, cedar, cottonwood, mullein)
+  - Spindle: straight, dry, slightly harder wood, 30–45cm, finger-width
+  - Bow: slightly curved branch, about arm's length
+  - Bowstring: leather cord, paracord, or twisted plant fiber
+  - Handhold: hard wood or stone with a socket divot
+  - Tinder bundle: dry grass, cattail fluff, birch bark shavings
+
+  **Steps:**
+  1. Cut a small depression in the fireboard. Cut a V-notch next to it.
+  2. Place a leaf or bark under the V-notch to catch the coal.
+  3. String spindle in bow. Place tip in fireboard depression.
+  4. Press handhold down on top of spindle to create downward pressure.
+  5. Bow back and forth rapidly and consistently — 60–80 strokes.
+  6. Smoke will appear, then a glowing coal (ember) falls into the notch catcher.
+  7. Carefully transfer the coal to the center of your tinder bundle.
+  8. Fold tinder around coal and blow gently until flame ignites.
+
+  ## Hand Drill Method (Simpler, Harder)
+
+  No bow required, but demands dry conditions and technique.
+  Spin the spindle between both palms, sliding hands downward for pressure.
+  Requires drier materials and more physical effort.
+
+  ## Wood Selection
+
+  The fireboard and spindle should be different woods of similar hardness.
+  The best combinations: willow/willow, cedar/willow, mullein/cottonwood.
+  Avoid green (wet) wood — it will not produce an ember.
+
+  ## Practice
+
+  Bow drill takes 30–100 hours of practice to do reliably.
+  Practice before you need it. In a survival situation is not the time to learn.
+
+  ## See Also
+
+  - fire-maintenance-and-fuel
+  - tinder-and-kindling-identification
+  - charcloth-making
+sources:
+  - Mors Kochanski, Bushcraft (1988)
+  - Tom Brown Jr., Tom Brown's Field Guide to Wilderness Survival
+last_updated: "2024-01-01"

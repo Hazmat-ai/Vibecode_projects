@@ -1,0 +1,57 @@
+id: water-purification-boiling
+title: Water Purification — Boiling
+domain: medicine
+tags: [water, health, fire, survival, sanitation]
+civilization_score: 95
+difficulty: 1
+requires_skills: [fire-making]
+summary: >
+  Boiling is the most reliable low-tech method to kill pathogens in water.
+  Requires only a container and a heat source. A rolling boil for 1 minute
+  renders water from virtually any source safe to drink.
+content: |
+  ## Why It Works
+
+  Most waterborne pathogens — bacteria, viruses, protozoa — are killed
+  at temperatures well below boiling point (70°C / 158°F).
+  Reaching a rolling boil for 1 minute is sufficient at most elevations.
+  At altitudes above 2000m, boil for 3 minutes due to lower boiling point.
+
+  ## What You Need
+
+  - A heat-safe container (metal pot, clay vessel, rock cavity sealed with clay)
+  - A reliable fire or other heat source
+  - Water from any source
+
+  ## Steps
+
+  1. Fill container with water from the source.
+  2. Place on fire or heat source.
+  3. Wait for a full *rolling* boil (large bubbles, steam rising vigorously).
+  4. Maintain boil for 1 minute (3 minutes above 2000m elevation).
+  5. Let cool in covered container. Cover prevents recontamination.
+  6. Store in a sealed container if not drinking immediately.
+
+  ## Limitations
+
+  - Boiling does NOT remove chemical contamination, heavy metals, or sediment.
+  - Fuel cost: each boiling cycle consumes firewood. Plan fuel collection.
+  - Taste: boiled water tastes flat. Pour back and forth between containers to aerate.
+  - Container: do not use plastic above 90°C — leaching risk.
+
+  ## Improvised Containers
+
+  If no metal pot is available:
+  - Clay pot sealed with pine resin (fire-hardened)
+  - Bamboo sections (green bamboo, not dry — dry burns through)
+  - Rock with natural depression, heated rocks added to water (rock boiling)
+
+  ## See Also
+
+  - water-filtration-improvised
+  - solar-disinfection-sodis
+  - clay-vessel-construction
+sources:
+  - WHO Guidelines for Drinking-water Quality, 4th Edition
+  - CDC Drinking Water Treatment Methods
+last_updated: "2024-01-01"

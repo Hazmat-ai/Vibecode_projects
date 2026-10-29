@@ -1,0 +1,11 @@
+id: food-cooking
+title: Food Cooking (Heat Treatment)
+domain: food
+civilization_score: 85
+requires: [fire-making]
+unlocks: [food-preservation-smoking, pottery-cooking, bread-making]
+summary: >
+  Using heat to make food safe and digestible. Kills parasites and bacteria,
+  increases caloric availability of starches, and extends short-term food safety.
+difficulty: 1
+time_to_learn_days: 7

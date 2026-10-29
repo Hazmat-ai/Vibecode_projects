@@ -1,1777 +1,304 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <title>ARM Cortex-M Simulator — Research Proof</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Courier+Prime:wght@400;700&display=swap');
-
-    :root {
-      --ion: #0055ff;
-      --plasma: #007700;
-      --amber: #bb6600;
-      --danger: #cc0000;
-      --dim: #555;
-      --bg: #f5f5f5;
-      --panel: #fff;
-      --border: #ccc;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background: var(--bg);
-      color: #111;
-      font-family: 'Roboto', sans-serif;
-      font-size: 14px;
-    }
-
-    .mono {
-      font-family: 'Courier Prime', monospace;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    /* TOP BAR */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px 16px;
-      margin-bottom: 12px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .app-title {
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: 0.04em;
-    }
-
-    .core-tabs {
-      display: flex;
-      gap: 4px;
-    }
-
-    .ctab {
-      padding: 5px 14px;
-      border: 1px solid var(--border);
-      background: #eee;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
-    .ctab:hover {
-      background: #ddd;
-    }
-
-    .ctab.sel-m0 {
-      background: #ffe5e5;
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    .ctab.sel-m0p {
-      background: #fff4e0;
-      border-color: var(--amber);
-      color: var(--amber);
-    }
-
-    .ctab.sel-m3 {
-      background: #e0eeff;
-      border-color: var(--ion);
-      color: var(--ion);
-    }
-
-    .ctab.sel-m4 {
-      background: #e0ffe5;
-      border-color: var(--plasma);
-      color: var(--plasma);
-    }
-
-    .pill {
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      border: 1px solid;
-    }
-
-    .pill.run {
-      background: #e0ffe5;
-      border-color: var(--plasma);
-      color: var(--plasma);
-    }
-
-    .pill.halt {
-      background: #ffe5e5;
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    .rbtn {
-      padding: 6px 16px;
-      border: 1px solid #999;
-      background: #eee;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .rbtn:hover {
-      background: #ddd;
-    }
-
-    .rbtn.on {
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    /* CORE INFO BAR */
-    .cib {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .cicard {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
-    .cicard:hover {
-      border-color: #888;
-    }
-
-    .cicard.sel {
-      border-width: 2px;
-    }
-
-    .cicard.sel-m0 {
-      border-color: var(--danger);
-      background: #fff8f8;
-    }
-
-    .cicard.sel-m0p {
-      border-color: var(--amber);
-      background: #fffbf5;
-    }
-
-    .cicard.sel-m3 {
-      border-color: var(--ion);
-      background: #f5f9ff;
-    }
-
-    .cicard.sel-m4 {
-      border-color: var(--plasma);
-      background: #f5fff7;
-    }
-
-    .ci-name {
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
-
-    .ci-row {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.82rem;
-      line-height: 1.6;
-    }
-
-    .best {
-      color: var(--plasma);
-      font-weight: 700;
-    }
-
-    .worst {
-      color: var(--danger);
-      font-weight: 700;
-    }
-
-    .mid {
-      color: var(--amber);
-      font-weight: 700;
-    }
-
-    /* MAIN LAYOUT */
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-items: start;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-
-    .plabel {
-      font-weight: 700;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-      color: var(--dim);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    /* SLIDERS */
-    .srow {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .srow label {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.85rem;
-      min-width: 70px;
-    }
-
-    .srow input[type=range] {
-      flex: 1;
-      accent-color: var(--ion);
-    }
-
-    .sval {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.85rem;
-      min-width: 38px;
-      text-align: right;
-      font-weight: 700;
-    }
-
-    /* ADC */
-    .adc-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .bignum {
-      font-family: 'Courier Prime', monospace;
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1;
-      transition: color 0.2s;
-    }
-
-    .bsub {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.9rem;
-      color: var(--dim);
-      margin-top: 3px;
-    }
-
-    .gauge {
-      position: relative;
-      height: 10px;
-      background: #e8e8e8;
-      border-radius: 3px;
-      border: 1px solid var(--border);
-      margin: 8px 0 4px;
-      overflow: visible;
-    }
-
-    .gfill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.15s, background 0.2s;
-    }
-
-    .gtick {
-      position: absolute;
-      top: -4px;
-      width: 2px;
-      height: 18px;
-      border-radius: 1px;
-    }
-
-    .glabels {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.72rem;
-      color: var(--dim);
-    }
-
-    /* LEDS */
-    .led-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .led-row:last-of-type {
-      border-bottom: none;
-    }
-
-    .led {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #ddd;
-      border: 1px solid #bbb;
-      flex-shrink: 0;
-      transition: background 0.15s, box-shadow 0.15s;
-    }
-
-    .led.on-safe {
-      background: #00bb00;
-      border-color: #007700;
-      box-shadow: 0 0 6px #00bb00;
-    }
-
-    .led.on-high {
-      background: #dd0000;
-      border-color: #aa0000;
-      box-shadow: 0 0 6px #dd0000;
-    }
-
-    .led.on-low {
-      background: #ee8800;
-      border-color: #bb6600;
-      box-shadow: 0 0 6px #ee8800;
-    }
-
-    .gpio-txt {
-      font-weight: 700;
-      font-size: 0.85rem;
-      text-align: center;
-      margin-top: 6px;
-    }
-
-    /* ASM */
-    .asm-wrap {
-      background: #f8f8f8;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-
-    .asm-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 10px;
-      background: #eee;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .asm-htxt {
-      font-weight: 700;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      color: var(--dim);
-    }
-
-    .cbadge {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.8rem;
-      padding: 1px 8px;
-      border: 1px solid var(--ion);
-      border-radius: 3px;
-      color: var(--ion);
-      background: #e8efff;
-    }
-
-    .al {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 2px 10px;
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.82rem;
-    }
-
-    .al .arr {
-      width: 12px;
-      color: transparent;
-      font-weight: 700;
-    }
-
-    .al .addr {
-      color: var(--dim);
-      min-width: 52px;
-      font-size: 0.75rem;
-    }
-
-    .al .op {
-      font-weight: 700;
-      min-width: 36px;
-    }
-
-    .al .args {
-      color: #333;
-      min-width: 110px;
-      font-size: 0.8rem;
-    }
-
-    .al .cmt {
-      color: #888;
-      font-size: 0.75rem;
-    }
-
-    .al.act {
-      background: #ddeeff;
-    }
-
-    .al.act .op {
-      color: var(--ion);
-    }
-
-    .al.act .arr {
-      color: var(--ion);
-    }
-
-    .al.ok {
-      background: #ddffdd;
-    }
-
-    .al.ok .op {
-      color: var(--plasma);
-    }
-
-    .al.ok .arr {
-      color: var(--plasma);
-    }
-
-    .al.ng {
-      background: #ffdddd;
-    }
-
-    .al.ng .op {
-      color: var(--danger);
-    }
-
-    .al.ng .arr {
-      color: var(--danger);
-    }
-
-    .adiv {
-      border-top: 1px dashed var(--border);
-      margin: 2px 0;
-      font-size: 0.72rem;
-      color: var(--dim);
-      text-align: center;
-      padding: 1px 0;
-    }
-
-    /* SENSOR CHART */
-    .scw {
-      position: relative;
-      height: 90px;
-      margin-bottom: 8px;
-    }
-
-    /* STATS */
-    .sstrip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .scard {
-      background: #f5f5f5;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .slbl {
-      font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      color: var(--dim);
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
-    .sval2 {
-      font-family: 'Courier Prime', monospace;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    /* EQ PROOF STRIP */
-    .eq-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .eqc {
-      background: #f5f5f5;
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--border);
-      border-radius: 4px;
-      padding: 7px 9px;
-    }
-
-    .eqc.safe {
-      border-left-color: var(--plasma);
-    }
-
-    .eqc.alert {
-      border-left-color: var(--danger);
-    }
-
-    .eqc.low {
-      border-left-color: var(--amber);
-    }
-
-    .eq-name {
-      font-size: 0.72rem;
-      color: var(--dim);
-      margin-bottom: 2px;
-    }
-
-    .eq-val {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #111;
-    }
-
-    /* EQ CALCULATOR TAB */
-    .eq-calc-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .calc-card {
-      background: #f5f5f5;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 10px;
-    }
-
-    .calc-num {
-      font-weight: 700;
-      font-size: 0.7rem;
-      color: var(--dim);
-      letter-spacing: 0.1em;
-      margin-bottom: 2px;
-    }
-
-    .calc-name {
-      font-weight: 700;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
-    }
-
-    .calc-formula {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.78rem;
-      color: var(--ion);
-      margin-bottom: 6px;
-    }
-
-    .calc-inputs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .ci-inp {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .ci-inp label {
-      font-size: 0.68rem;
-      color: var(--dim);
-      margin-bottom: 2px;
-    }
-
-    .ci-inp input {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.82rem;
-      padding: 3px 6px;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      width: 80px;
-      background: #fff;
-    }
-
-    .calc-result {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 5px 8px;
-      background: #e8efff;
-      border: 1px solid #aac;
-      border-radius: 3px;
-      color: var(--ion);
-    }
-
-    .calc-steps {
-      margin-top: 5px;
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.75rem;
-      color: var(--dim);
-      line-height: 1.6;
-    }
-
-    /* TABS */
-    .subtabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 10px;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 0;
-    }
-
-    .stab {
-      padding: 6px 14px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 700;
-      border: 1px solid transparent;
-      border-bottom: none;
-      border-radius: 4px 4px 0 0;
-      color: var(--dim);
-      background: transparent;
-      margin-bottom: -2px;
-    }
-
-    .stab.active {
-      background: var(--panel);
-      border-color: var(--border);
-      color: var(--ion);
-      border-bottom: 2px solid var(--panel);
-    }
-
-    /* CHARTS */
-    .cc {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
-
-    .cc-hdr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
-    }
-
-    .cc-ttl {
-      font-weight: 700;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      color: var(--dim);
-      text-transform: uppercase;
-    }
-
-    .cc-sel {
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    .ldot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-
-    .proof-note {
-      font-family: 'Courier Prime', monospace;
-      font-size: 0.75rem;
-      color: var(--dim);
-      margin-top: 4px;
-      padding: 4px 6px;
-      background: #f0f0f0;
-      border-radius: 3px;
-      border-left: 3px solid var(--ion);
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div class="app-title">ARM CORTEX-M · SENSOR THRESHOLD ALERT · RESEARCH SIMULATOR</div>
-      <div class="core-tabs">
-        <button class="ctab" id="tb-m0" onclick="selCore('m0')">M0</button>
-        <button class="ctab" id="tb-m0p" onclick="selCore('m0p')">M0+</button>
-        <button class="ctab" id="tb-m3" onclick="selCore('m3')">M3</button>
-        <button class="ctab" id="tb-m4" onclick="selCore('m4')">M4</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="An offline ARM Cortex-M threshold and timing teaching lab."
+    />
+    <title>Signal Bench · ARM threshold lab</title>
+    <link rel="icon" href="simulator/mark.svg" />
+    <link rel="stylesheet" href="simulator/styles.css" />
+    <script type="module" src="simulator/app.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to lab</a>
+    <header class="masthead">
+      <a class="brand" href="simulator.html"
+        ><img src="simulator/mark.svg" alt="" />Signal Bench</a
+      ><span class="course">ARM Cortex-M · threshold lab</span
+      ><span class="author">Hamza Rizvi &amp; Samuel Okegbile</span>
+    </header>
+    <main id="main">
+      <div class="intro">
+        <div>
+          <p class="eyebrow">01 / Observe, compare, understand</p>
+          <h1>Where does the alert happen?</h1>
+          <p class="lede">
+            Trace an ADC reading through a polling loop. Explore thresholds and
+            timing with every assumption in view.
+          </p>
+        </div>
+        <div class="session-tools">
+          <button id="export-session">Save settings</button
+          ><button id="import-session">Load settings</button
+          ><input
+            id="file"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="pill halt" id="spill">HALTED</span>
-        <button class="rbtn" id="rbtn-rst" onclick="resetSim()" style="color:var(--dim);border-color:var(--dim);">↺
-          RESET</button>
-        <button class="rbtn" id="rbtn" onclick="toggleRun()">▶ RUN</button>
+      <p class="disclosure">
+        Educational model · generated sensor data · timing estimates, not
+        measurements from hardware.
+      </p>
+      <div id="error" role="alert" hidden></div>
+      <section class="controls" aria-label="Simulation controls">
+        <div class="field">
+          <label for="core">Processor core</label
+          ><select id="core">
+            <option value="m0">Cortex-M0</option>
+            <option value="m0p">Cortex-M0+</option>
+            <option value="m3" selected>Cortex-M3</option>
+            <option value="m4">Cortex-M4</option>
+          </select>
+        </div>
+        <div class="field small">
+          <label for="clockMHz">Clock (MHz)</label
+          ><input
+            id="clockMHz"
+            type="number"
+            min="1"
+            max="1000"
+            step="1"
+            value="72"
+          />
+        </div>
+        <div class="field">
+          <label for="source">Signal source</label
+          ><select id="source">
+            <option value="sine">Sine wave + noise</option>
+            <option value="manual">Manual ADC code</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button id="step">Single sample</button
+          ><button id="run" class="primary">Run simulation</button
+          ><button id="reset" aria-label="Reset simulation">Reset</button>
+        </div>
+      </section>
+      <div class="workspace">
+        <aside class="settings">
+          <p class="eyebrow">Input conditions</p>
+          <div class="field">
+            <label for="low"
+              >Lower threshold <output id="low-value">800</output></label
+            ><input id="low" type="range" min="0" max="4094" value="800" />
+          </div>
+          <div class="field">
+            <label for="high"
+              >Upper threshold <output id="high-value">3200</output></label
+            ><input id="high" type="range" min="1" max="4095" value="3200" />
+          </div>
+          <div class="field">
+            <label for="manual"
+              >Manual ADC code <output id="manual-value">2048</output></label
+            ><input id="manual" type="range" min="0" max="4095" value="2048" />
+          </div>
+          <div class="field">
+            <label for="sampleHz">Sampling rate (Hz)</label
+            ><input
+              id="sampleHz"
+              type="number"
+              min="1"
+              max="20"
+              step="0.5"
+              value="2"
+            />
+          </div>
+          <div class="field">
+            <label for="signalHz">Signal frequency (Hz)</label
+            ><input
+              id="signalHz"
+              type="number"
+              min="0.01"
+              max="10"
+              step="0.01"
+              value="0.2"
+            />
+          </div>
+          <div class="field">
+            <label for="noise"
+              >Noise amplitude (codes)
+              <output id="noise-value">80</output></label
+            ><input id="noise" type="range" min="0" max="1000" value="80" />
+          </div>
+          <details>
+            <summary>Timing assumptions</summary>
+            <p class="help">
+              Instruction costs below are editable teaching assumptions, not a
+              per-core cycle table.
+            </p>
+            <div class="field">
+              <label for="loadCycles">LDR cost (cycles)</label
+              ><input
+                id="loadCycles"
+                type="number"
+                min="1"
+                max="100"
+                value="2"
+              />
+            </div>
+            <div class="field">
+              <label for="storeCycles">STR cost (cycles)</label
+              ><input
+                id="storeCycles"
+                type="number"
+                min="1"
+                max="100"
+                value="2"
+              />
+            </div>
+            <div class="field">
+              <label for="branchCycles">Taken branch cost (cycles)</label
+              ><input
+                id="branchCycles"
+                type="number"
+                min="1"
+                max="100"
+                value="3"
+              />
+            </div>
+            <div class="field">
+              <label for="gpioNs">Extra GPIO delay (ns)</label
+              ><input
+                id="gpioNs"
+                type="number"
+                min="0"
+                max="10000"
+                step="0.1"
+                value="2"
+              />
+            </div>
+            <div class="field">
+              <label for="seed">Random seed</label
+              ><input
+                id="seed"
+                type="number"
+                min="1"
+                max="4294967295"
+                value="42"
+              />
+            </div>
+            <p class="help">
+              Other instructions and untaken conditional branches cost one
+              modeled cycle. Register loads stand in for address resolution; no
+              real memory map is emulated.
+            </p>
+          </details>
+          <p id="nyquist" class="note"></p>
+        </aside>
+        <div class="bench">
+          <section class="readouts" aria-label="Current sample">
+            <div>
+              <p class="eyebrow">ADC / 12 bit</p>
+              <div class="reading">
+                <span id="adc">2048</span><span class="unit">/ 4095</span>
+              </div>
+              <p id="voltage">1.650 V input</p>
+            </div>
+            <div>
+              <p class="eyebrow">GPIO output</p>
+              <p id="alert" class="status safe">SAFE</p>
+              <p id="boundary">800 ≤ D ≤ 3200</p>
+            </div>
+            <div>
+              <p class="eyebrow">Session</p>
+              <p id="sample-count" class="session-count">0 samples</p>
+              <p id="run-status" role="status">Paused · ready to sample</p>
+            </div>
+          </section>
+          <section class="plot-section">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Live trace</p>
+                <h2>Sensor signal</h2>
+              </div>
+              <button id="export-csv" disabled>Export CSV</button>
+            </div>
+            <div
+              id="signal-plot"
+              class="plot"
+              role="img"
+              aria-label="ADC codes over simulated time, with upper and lower thresholds"
+            ></div>
+            <p class="help">
+              Last 60 samples shown. CSV retains up to 1,000 samples. Sample
+              time is simulated; the browser clock is not a hardware timer.
+            </p>
+          </section>
+          <section>
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Follow the decision</p>
+                <h2>The polling path</h2>
+              </div>
+              <span id="path-count" class="help"></span>
+            </div>
+            <div class="code-layout">
+              <div
+                id="assembly"
+                class="assembly"
+                aria-label="Illustrative Thumb instruction path"
+              ></div>
+              <div class="timing">
+                <h3>Timing notebook</h3>
+                <dl id="timing"></dl>
+                <p class="help">
+                  Exception entry is a reference value under ideal
+                  zero-wait-state conditions. Interrupt work and scheduler costs
+                  are not included.
+                </p>
+                <p class="note">
+                  This is a busy polling loop. The per-sample work fraction
+                  below is not total CPU utilization; waiting and polling can
+                  keep a core occupied.
+                </p>
+              </div>
+            </div>
+          </section>
+          <section class="comparison">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">One path, four clock settings</p>
+                <h2>Core comparison</h2>
+              </div>
+            </div>
+            <div
+              id="comparison-plot"
+              class="plot"
+              role="img"
+              aria-label="Modeled polling execution time and ideal exception-entry time by core"
+            ></div>
+            <p class="help">
+              Defaults are example system clocks, not maximum core
+              specifications. Your selected core uses the clock entered above.
+              Polling and exception-entry bars describe different operations.
+            </p>
+          </section>
+          <section class="equations">
+            <p class="eyebrow">The calculations behind the display</p>
+            <h2>Equation notebook</h2>
+            <div id="equations"></div>
+          </section>
+        </div>
       </div>
-    </div>
-
-    <!-- CORE INFO BAR -->
-    <div class="cib" id="cib"></div>
-
-    <!-- MAIN LAYOUT -->
-    <div class="layout">
-
-      <!-- ══ LEFT ══ -->
-      <div>
-
-        <!-- SUBTABS -->
-        <div class="subtabs">
-          <button class="stab active" onclick="switchSub('sim',this)">SIMULATION</button>
-          <button class="stab" onclick="switchSub('eqs',this)">EQ CALCULATORS</button>
-        </div>
-
-        <!-- SIM PANE -->
-        <div id="sub-sim">
-
-          <!-- SLIDERS -->
-          <div class="panel">
-            <div class="srow">
-              <label>T_LOW</label>
-              <input type="range" id="sl-tl" min="100" max="1500" step="10" value="800" oninput="onSlide()">
-              <span class="sval" id="v-tl" style="color:var(--amber)">800</span>
-            </div>
-            <div class="srow">
-              <label>T_HIGH</label>
-              <input type="range" id="sl-th" min="1500" max="4000" step="10" value="3200" oninput="onSlide()">
-              <span class="sval" id="v-th" style="color:var(--danger)">3200</span>
-            </div>
-            <div class="srow">
-              <label>Noise</label>
-              <input type="range" id="sl-ns" min="50" max="1000" step="10" value="400" oninput="onSlide()">
-              <span class="sval" id="v-ns" style="color:var(--dim)">400</span>
-            </div>
-          </div>
-
-          <!-- ADC + GPIO -->
-          <div class="adc-grid">
-            <div class="panel" style="margin-bottom:0;">
-              <div class="plabel">ADC Output D</div>
-              <div class="bignum" id="dval" style="color:var(--plasma)">—</div>
-              <div class="bsub" id="vval">— V</div>
-              <div class="gauge">
-                <div class="gfill" id="gfill" style="width:0%;background:var(--plasma);"></div>
-                <div class="gtick" id="gtl" style="background:var(--amber);"></div>
-                <div class="gtick" id="gth" style="background:var(--danger);"></div>
-              </div>
-              <div class="glabels">
-                <span>0</span>
-                <span style="color:var(--amber)" id="gltl">T_LOW</span>
-                <span style="color:var(--danger)" id="glth">T_HIGH</span>
-                <span>4095</span>
-              </div>
-              <div class="glabels" style="margin-top:2px; font-size:0.75rem; padding-bottom:8px">
-                <span>0 V</span>
-                <span style="color:var(--amber)" id="gvtl">—</span>
-                <span style="color:var(--danger)" id="gvth">—</span>
-                <span>3.3 V</span>
-              </div>
-            </div>
-            <div class="panel" style="margin-bottom:0;">
-              <div class="plabel">GPIO Alert Output</div>
-              <div class="led-row">
-                <div class="led" id="ls"></div><span>SAFE</span>
-              </div>
-              <div class="led-row">
-                <div class="led" id="lh"></div><span>HIGH</span>
-              </div>
-              <div class="led-row">
-                <div class="led" id="ll"></div><span>LOW</span>
-              </div>
-              <div class="gpio-txt" id="gtxt" style="color:var(--dim)">STANDBY</div>
-            </div>
-          </div>
-
-          <!-- ASM -->
-          <div class="asm-wrap">
-            <div class="asm-hdr">
-              <span class="asm-htxt">ARM THUMB POLLING LOOP</span>
-              <span class="cbadge" id="cbadge">— cycles</span>
-            </div>
-            <div style="padding:3px 0;" id="asmbox">
-              <div class="al" id="A0"><span class="arr"></span><span class="addr">0x0000</span><span
-                  class="op">LDR</span><span class="args">R1,[ADC_DR]</span><span class="cmt">; read 12-bit ADC →
-                  R1</span></div>
-              <div class="al" id="A1"><span class="arr"></span><span class="addr">0x0002</span><span
-                  class="op">LDR</span><span class="args">R2,=T_HIGH</span><span class="cmt">; load upper
-                  threshold</span></div>
-              <div class="al" id="A2"><span class="arr"></span><span class="addr">0x0004</span><span
-                  class="op">CMP</span><span class="args">R1,R2</span><span class="cmt">; set N,Z,C,V flags</span></div>
-              <div class="al" id="A3"><span class="arr"></span><span class="addr">0x0006</span><span
-                  class="op">BGT</span><span class="args">ALERT_H</span><span class="cmt">; branch if D &gt; T_HIGH
-                  (EQ5)</span></div>
-              <div class="al" id="A4"><span class="arr"></span><span class="addr">0x0008</span><span
-                  class="op">LDR</span><span class="args">R3,=T_LOW</span><span class="cmt">; load lower
-                  threshold</span></div>
-              <div class="al" id="A5"><span class="arr"></span><span class="addr">0x000A</span><span
-                  class="op">CMP</span><span class="args">R1,R3</span><span class="cmt">; set flags</span></div>
-              <div class="al" id="A6"><span class="arr"></span><span class="addr">0x000C</span><span
-                  class="op">BLT</span><span class="args">ALERT_L</span><span class="cmt">; branch if D &lt; T_LOW
-                  (EQ6)</span></div>
-              <div class="al" id="A7"><span class="arr"></span><span class="addr">0x000E</span><span
-                  class="op">MOV</span><span class="args">R0,#0x00</span><span class="cmt">; safe — GPIO LOW
-                  (EQ7)</span></div>
-              <div class="al" id="A8"><span class="arr"></span><span class="addr">0x0010</span><span
-                  class="op">STR</span><span class="args">R0,[GPIO_OUT]</span><span class="cmt">; write 0 to GPIO
-                  pin</span></div>
-              <div class="al" id="A9"><span class="arr"></span><span class="addr">0x0012</span><span
-                  class="op">B</span><span class="args">POLL_START</span><span class="cmt">; loop back (EQ3:
-                  fs=2Hz)</span></div>
-              <div class="adiv">── alert path ──</div>
-              <div class="al" id="AA"><span class="arr"></span><span class="addr">ALERT:</span><span
-                  class="op">MOV</span><span class="args">R0,#0xFF</span><span class="cmt">; alert value</span></div>
-              <div class="al" id="AB"><span class="arr"></span><span class="addr">0x001A</span><span
-                  class="op">STR</span><span class="args">R0,[GPIO_OUT]</span><span class="cmt">; assert GPIO
-                  HIGH</span></div>
-              <div class="al" id="AC"><span class="arr"></span><span class="addr">0x001C</span><span
-                  class="op">B</span><span class="args">POLL_START</span><span class="cmt">; loop back</span></div>
-            </div>
-          </div>
-
-          <!-- SENSOR CHART -->
-          <div class="panel">
-            <div class="plabel">Live Sensor Trace — D value vs T_HIGH / T_LOW</div>
-            <div class="scw"><canvas id="schart"></canvas></div>
-          </div>
-
-          <!-- STATS -->
-          <div class="sstrip">
-            <div class="scard">
-              <div class="slbl">Poll Cycles</div>
-              <div class="sval2" id="sc-cyc" style="color:var(--ion)">—</div>
-            </div>
-            <div class="scard">
-              <div class="slbl">NOP Delay</div>
-              <div class="sval2" id="sc-nop" style="color:var(--dim)">120+</div>
-              <div style="font-size:0.6rem;color:var(--dim);margin-top:2px;" id="sc-nop-lbl"></div>
-            </div>
-            <div class="scard">
-              <div class="slbl">Alerts</div>
-              <div class="sval2" id="sc-alt" style="color:var(--amber)">0</div>
-            </div>
-            <div class="scard">
-              <div class="slbl">Samples</div>
-              <div class="sval2" id="sc-smp" style="color:var(--plasma)">0</div>
-            </div>
-          </div>
-
-          <!-- LOG BOX -->
-          <div class="panel">
-            <div class="plabel">SIMULATION LOG (Live Determinism Proof)</div>
-            <div id="simLog"
-              style="height:120px; overflow-y:auto; background:#111; color:#0f0; font-family:'Courier Prime',monospace; font-size:0.75rem; padding:8px; border-radius:4px; line-height:1.4;">
-            </div>
-          </div>
-
-          <!-- LIVE EQ PROOFS -->
-          <div class="panel">
-            <div class="plabel">Live Equation Proofs — updates every sample</div>
-            <div class="eq-grid">
-              <div class="eqc" id="peq0_nyq">
-                <div class="eq-name">EQ4 · Nyquist (fs ≥ 2f_max)</div>
-                <div class="eq-val" id="pv_nyq">—</div>
-              </div>
-              <div class="eqc" id="peq1">
-                <div class="eq-name">EQ1 · D = (Vin/Vref)×(2ⁿ−1)</div>
-                <div class="eq-val" id="pv1">—</div>
-              </div>
-              <div class="eqc" id="peq2">
-                <div class="eq-name">EQ2 · Resolution = Vref/2ⁿ</div>
-                <div class="eq-val" id="pv2">—</div>
-              </div>
-              <div class="eqc" id="peq3">
-                <div class="eq-name">EQ5/6/7 · Threshold condition</div>
-                <div class="eq-val" id="pv3">—</div>
-              </div>
-              <div class="eqc" id="peq4">
-                <div class="eq-name">EQ8 · T_exec = N×T_clock</div>
-                <div class="eq-val" id="pv4">—</div>
-              </div>
-              <div class="eqc" id="peq5">
-                <div class="eq-name">EQ9 · T_latency = T_s+T_cmp+T_br</div>
-                <div class="eq-val" id="pv5">—</div>
-              </div>
-              <div class="eqc" id="peq6">
-                <div class="eq-name">EQ10 · T_alert = T_exec+T_GPIO</div>
-                <div class="eq-val" id="pv6">—</div>
-              </div>
-              <div class="eqc" id="peq7">
-                <div class="eq-name">EQ11 · P = V × I</div>
-                <div class="eq-val" id="pv7">—</div>
-              </div>
-              <div class="eqc" id="peq8">
-                <div class="eq-name">EQ12 · U = T_active/T_total</div>
-                <div class="eq-val" id="pv8">—</div>
-              </div>
-            </div>
-          </div>
-
-        </div><!-- /sub-sim -->
-
-        <!-- EQ CALCULATORS PANE -->
-        <div id="sub-eqs" style="display:none;">
-          <div class="eq-calc-grid" id="calc-grid"></div>
-        </div>
-
-      </div><!-- /left col -->
-
-      <!-- ══ RIGHT ══ -->
-      <div>
-
-        <!-- GRAPH A -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld1"></span>Graph A · IRQ Entry Latency — Clock Cycles</span>
-            <span class="cc-sel" id="ga-lbl"></span>
-          </div>
-          <div style="position:relative;height:155px;"><canvas id="gA"></canvas></div>
-          <div class="proof-note" id="gA-note"></div>
-        </div>
-
-        <!-- GRAPH B -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld2"></span>Graph B · IRQ Entry Latency — Nanoseconds</span>
-          </div>
-          <div style="position:relative;height:155px;"><canvas id="gB"></canvas></div>
-          <div class="proof-note" id="gB-note"></div>
-        </div>
-
-        <!-- GRAPH C -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld3"></span>Graph C · Cycles Per Response Path</span>
-            <span class="cc-sel" id="gC-lbl" style="color:var(--plasma)"></span>
-          </div>
-          <div style="position:relative;height:180px;"><canvas id="gC"></canvas></div>
-          <div style="display:flex; justify-content:center; gap:8px; font-size:0.7rem; flex-wrap:wrap; margin-top:4px;">
-            <span style="color:#0099ff">■ Min</span>
-            <span style="color:#007700">■ Poll</span>
-            <span style="color:#0055ff">■ Entry</span>
-            <span style="color:#bb6600">■ Save</span>
-            <span style="color:#cc0000">■ OS</span>
-            <span style="color:#880000">■ RTOS Total</span>
-          </div>
-          <div class="proof-note" id="gC-note"></div>
-        </div>
-
-        <!-- GRAPH D -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl">Graph D · Relative Memory Footprint</span>
-          </div>
-          <div style="position:relative;height:100px;"><canvas id="gD"></canvas></div>
-          <div class="proof-note">Bare-Metal ASM = 0 middleware layers → ~0.5% of baseline OS memory footprint</div>
-        </div>
-
-        <!-- EQ12 CPU UTILIZATION CHART -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld5" style="background:var(--dim)"></span>EQ12 · CPU Utilization
-              (per 500ms)</span>
-          </div>
-          <div style="position:relative;height:120px;display:flex;justify-content:center;">
-            <div style="height:120px;width:120px;"><canvas id="gU"></canvas></div>
-          </div>
-          <div class="proof-note" id="gU-note"></div>
-        </div>
-
-        <!-- GRAPH F · RADAR DIAGRAM -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld6" style="background:var(--plasma)"></span>Graph F ·
-              Architecture Radar (Page 10)</span>
-          </div>
-          <div style="position:relative;height:180px;"><canvas id="gF"></canvas></div>
-          <div class="proof-note" id="gF-note">Scores derived from paper Figure 2 (page 10) — 5=best, 1=worst. Proposed
-            ASM updates dynamically based on active core metrics.</div>
-        </div>
-
-        <!-- GRAPH P · POWER BUDGET COMPARISON -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ldP" style="background:var(--danger)"></span>Graph P · Total
-              Power Budget</span>
-            <span class="cc-sel" style="color:var(--danger)">5× Higher</span>
-          </div>
-          <div style="position:relative;height:120px;"><canvas id="gP"></canvas></div>
-          <div class="proof-note" id="gP-note">Bare metal polling vs RTOS thread suspension. Active RTOS context
-            switching dramatically increases the current draw from 1mA to ~5mA.</div>
-        </div>
-
-        <!-- GRAPH E — NEW: T_exec per core -->
-        <div class="cc">
-          <div class="cc-hdr">
-            <span class="cc-ttl"><span class="ldot" id="ld4"></span>Graph E · T_exec Per Core (EQ8 Live Proof)</span>
-            <span class="cc-sel" id="gE-lbl" style="color:var(--ion)"></span>
-          </div>
-          <div style="position:relative;height:145px;"><canvas id="gE"></canvas></div>
-          <div class="proof-note" id="gE-note"></div>
-        </div>
-
-      </div><!-- /right col -->
-    </div><!-- /layout -->
-  </div><!-- /container -->
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <script>
-    /* ══════════════════════════════════════════════
-       CORE DATA
-    ══════════════════════════════════════════════ */
-    const CORES = {
-      m0: { id: 'm0', name: 'M0', full: 'Cortex-M0', cycles: 16, clk: 32, ns: 500.0, color: '#cc0000', alpha: 'rgba(204,0,0,0.18)' },
-      m0p: { id: 'm0p', name: 'M0+', full: 'Cortex-M0+', cycles: 15, clk: 48, ns: 312.5, color: '#bb6600', alpha: 'rgba(187,102,0,0.18)' },
-      m3: { id: 'm3', name: 'M3', full: 'Cortex-M3', cycles: 12, clk: 72, ns: 166.7, color: '#0055ff', alpha: 'rgba(0,85,255,0.18)' },
-      m4: { id: 'm4', name: 'M4', full: 'Cortex-M4', cycles: 12, clk: 168, ns: 71.4, color: '#007700', alpha: 'rgba(0,119,0,0.18)' }
-    };
-    const CKEYS = ['m0', 'm0p', 'm3', 'm4'];
-    let activeCore = 'm3';
-
-    /* ══════════════════════════════════════════════
-       SIMULATION STATE
-    ══════════════════════════════════════════════ */
-    let isRunning = false;
-    let simInt = null;
-    let sBase = 2048, dir = 1;
-    let animBusy = false;
-    let pollCycles = 10;
-    let totalAlerts = 0, totalSamples = 0;
-    let dHist = [], thHist = [], tlHist = [], colHist = [];
-    let dArr = [];
-
-    function resetSim() {
-      totalAlerts = 0;
-      totalSamples = 0;
-      pollCycles = 10;
-      sBase = 2048;
-      dir = 1;
-      dHist = []; thHist = []; tlHist = []; colHist = []; dArr = []; prevD = 2048;
-      document.getElementById('sc-alt').textContent = '0 (0%)';
-      document.getElementById('sc-smp').textContent = '0';
-      const logDiv = document.getElementById('simLog');
-      if (logDiv) logDiv.innerHTML = '';
-      if (sc) {
-        sc.data.labels = [];
-        sc.data.datasets.forEach(dst => dst.data = []);
-        sc.update('none');
-      }
-    }
-    const MAX_PTS = 50;
-
-    /* ══════════════════════════════════════════════
-       CHART INSTANCES
-    ══════════════════════════════════════════════ */
-    let gA, gB, gC, gD, gE, sc, gU, gF, gP;
-    let prevD = 2048;
-
-    /* ══════════════════════════════════════════════
-       INIT
-    ══════════════════════════════════════════════ */
-    window.onload = function () {
-      buildCoreInfoBar();
-      initCharts();
-      buildCalcCards();
-      selCore('m3');
-    };
-
-    /* ══════════════════════════════════════════════
-       TOGGLE RUN
-    ══════════════════════════════════════════════ */
-    function toggleRun() {
-      isRunning = !isRunning;
-      const btn = document.getElementById('rbtn');
-      const pill = document.getElementById('spill');
-      if (isRunning) {
-        btn.textContent = '■ STOP'; btn.classList.add('on');
-        pill.textContent = 'RUNNING'; pill.className = 'pill run';
-        clearInterval(simInt);
-        simInt = setInterval(simTick, 500);
-        simTick();
-      } else {
-        btn.textContent = '▶ RUN'; btn.classList.remove('on');
-        pill.textContent = 'HALTED'; pill.className = 'pill halt';
-        clearInterval(simInt);
-        simInt = null;
-        clearAsm();
-      }
-    }
-
-    /* ══════════════════════════════════════════════
-       CORE SELECTOR
-    ══════════════════════════════════════════════ */
-    function selCore(id) {
-      activeCore = id;
-      const c = CORES[id];
-
-      // Update tabs
-      CKEYS.forEach(k => {
-        const t = document.getElementById('tb-' + k);
-        t.className = 'ctab';
-        if (k === id) t.classList.add('sel-' + k);
-      });
-
-      // Update core info bar
-      CKEYS.forEach(k => {
-        const card = document.getElementById('ci-' + k);
-        card.className = 'cicard';
-        if (k === id) card.classList.add('sel', 'sel-' + k);
-      });
-
-      // Update live dots color
-      ['ld1', 'ld2', 'ld3', 'ld4'].forEach(id2 => {
-        const e = document.getElementById(id2);
-        if (e) e.style.background = c.color;
-      });
-
-      // Graph labels
-      document.getElementById('ga-lbl').textContent = '[ ' + c.full.toUpperCase() + ' ]';
-      document.getElementById('ga-lbl').style.color = c.color;
-
-      // Update all charts
-      refreshChartColors();
-      updateGC();
-      updateGE();
-      updateGraphNotes();
-
-      // Update proofs (recalc radar + stats immediately even if halted)
-      if (!isRunning) {
-        pollCycles = 10; // default safe min assumption when paused
-        updateGC();
-        updateGE();
-      } else {
-        const d = parseInt(document.getElementById('dval').textContent) || 2048;
-        const tl = +document.getElementById('sl-tl').value;
-        const th = +document.getElementById('sl-th').value;
-        const vin = (d / 4095 * 3.3);
-        const state = d > th ? 'high' : d < tl ? 'low' : 'safe';
-        updateProofs(d, vin, state, tl, th);
-      }
-    }
-
-    /* ══════════════════════════════════════════════
-       CORE INFO BAR
-    ══════════════════════════════════════════════ */
-    function buildCoreInfoBar() {
-      const wrap = document.getElementById('cib');
-      wrap.innerHTML = '';
-      CKEYS.forEach(k => {
-        const c = CORES[k];
-        const tclk = (1000 / c.clk).toFixed(2);
-        const cyClass = c.cycles === 12 ? 'best' : c.cycles === 15 ? 'mid' : 'worst';
-        const nsClass = c.ns < 200 ? 'best' : c.ns > 400 ? 'worst' : 'mid';
-        const d = document.createElement('div');
-        d.className = 'cicard';
-        d.id = 'ci-' + k;
-        d.onclick = () => selCore(k);
-        d.innerHTML = `
-      <div class="ci-name" style="color:${c.color}">${c.full}</div>
-      <div class="ci-row">IRQ Cycles: <span class="${cyClass}">${c.cycles}</span></div>
-      <div class="ci-row">Max Clock: <span>${c.clk} MHz</span></div>
-      <div class="ci-row">Latency: <span class="${nsClass}">${c.ns} ns</span></div>
-      <div class="ci-row">T_clock: <span>${tclk} ns</span></div>
-    `;
-        wrap.appendChild(d);
-      });
-    }
-
-    /* ══════════════════════════════════════════════
-       SLIDERS
-    ══════════════════════════════════════════════ */
-    function onSlide() {
-      const tl = +document.getElementById('sl-tl').value;
-      const th = +document.getElementById('sl-th').value;
-      const ns = +document.getElementById('sl-ns').value;
-      document.getElementById('v-tl').textContent = tl;
-      document.getElementById('v-th').textContent = th;
-      document.getElementById('v-ns').textContent = ns;
-      document.getElementById('gtl').style.left = (tl / 4095 * 100).toFixed(1) + '%';
-      document.getElementById('gth').style.left = (th / 4095 * 100).toFixed(1) + '%';
-      document.getElementById('gltl').textContent = tl;
-      document.getElementById('glth').textContent = th;
-      const res = 3.3 / 4096;
-      document.getElementById('gvtl').textContent = (tl * res).toFixed(3) + ' V';
-      document.getElementById('gvth').textContent = (th * res).toFixed(3) + ' V';
-    }
-    onSlide();
-
-    /* ══════════════════════════════════════════════
-       SIMULATION TICK
-    ══════════════════════════════════════════════ */
-    function simTick() {
-      if (!isRunning) return;
-      const tl = +document.getElementById('sl-tl').value;
-      const th = +document.getElementById('sl-th').value;
-      const noise = +document.getElementById('sl-ns').value;
-
-      // Drift sensor value
-      sBase += dir * (20 + Math.random() * 80);
-      if (sBase > 4095 - noise) dir = -1;
-      if (sBase < noise) dir = 1;
-      const D = Math.max(0, Math.min(4095, Math.round(sBase + (Math.random() - 0.5) * noise * 2)));
-      const vin = D / 4095 * 3.3;
-
-      const state = D > th ? 'high' : D < tl ? 'low' : 'safe';
-      pollCycles = state === 'safe' ? 10 : 12;
-      totalSamples++;
-      if (state !== 'safe') totalAlerts++;
-
-      // Update stats
-      document.getElementById('sc-cyc').textContent = pollCycles;
-      const pct = totalSamples > 0 ? Math.round((totalAlerts / totalSamples) * 100) : 0;
-      document.getElementById('sc-alt').textContent = `${totalAlerts} (${pct}%)`;
-      document.getElementById('sc-smp').textContent = totalSamples;
-
-      // Update panels
-      updateADCPanel(D, vin, state, tl, th);
-      updateLEDs(state);
-      updateProofs(D, vin, state, tl, th);
-
-      // LOG & NOP
-      const tclk = 1000 / CORES[activeCore].clk;
-      const texec = (pollCycles * tclk);
-
-      const simLog = document.getElementById('simLog');
-      const dLog = document.createElement('div');
-      const eqStr = state === 'safe' ? `SAFE: T_LOW≤D≤T_HIGH` : state === 'high' ? `${D}>${th} | BGT fires` : `${D}<${tl} | BLT fires`;
-      dLog.textContent = `Sample ${totalSamples} | D=${D} | ${eqStr} | T_exec=${texec.toFixed(2)}ns @ ${CORES[activeCore].name}`;
-      dLog.style.color = state === 'safe' ? '#0f0' : (state === 'high' ? '#f55' : '#fa0');
-      simLog.appendChild(dLog);
-      simLog.scrollTop = simLog.scrollHeight;
-
-
-      // Trim log
-      while (simLog.childNodes.length > 100) {
-        simLog.removeChild(simLog.firstChild);
-      }
-
-      // EQ4 Nyquist Live Fixed
-      dArr.push(D);
-      if (dArr.length > 5) dArr.shift();
-
-      let maxRate = 0;
-      for (let i = 1; i < dArr.length; i++) {
-        let diff = Math.abs(dArr[i] - dArr[i - 1]);
-        if (diff > maxRate) maxRate = diff;
-      }
-
-      // Convert max amplitude change per 0.5s into rough frequency estimate
-      // Full scale is 4096. If it swings 4096 in 0.5s -> f=1Hz
-      const fmax_est = maxRate / 2048;
-      const peq0 = document.getElementById('peq0_nyq');
-      const pv_nyq = document.getElementById('pv_nyq');
-      if (fmax_est > 0.9) {
-        pv_nyq.innerHTML = `f_max ≈ ${fmax_est.toFixed(2)}Hz → <span style="color:var(--danger)">RISK (ALIAsING)</span>`;
-        peq0.className = 'eqc alert';
-      } else {
-        pv_nyq.innerHTML = `f_max ≈ ${fmax_est.toFixed(2)}Hz → <span style="color:var(--plasma)">✓ OK</span>`;
-        peq0.className = 'eqc safe';
-      }
-      prevD = D;
-
-
-      // ASM animation
-      if (!animBusy) playAsm(state);
-
-      // Update graphs C + E every tick
-      updateGC();
-      updateGE();
-
-      // Sensor line chart
-      const ptColor = state === 'safe' ? '#007700' : state === 'high' ? '#cc0000' : '#bb6600';
-      dHist.push(D); thHist.push(th); tlHist.push(tl); colHist.push(ptColor);
-      if (dHist.length > MAX_PTS) { dHist.shift(); thHist.shift(); tlHist.shift(); colHist.shift(); }
-      sc.data.labels = dHist.map((_, i) => i);
-      sc.data.datasets[0].data = [...dHist];
-      sc.data.datasets[0].pointBackgroundColor = [...colHist];
-      sc.data.datasets[0].borderColor = ptColor;
-      sc.data.datasets[1].data = [...thHist];
-      sc.data.datasets[2].data = [...tlHist];
-      sc.update('none');
-    }
-
-    /* ══════════════════════════════════════════════
-       ADC PANEL
-    ══════════════════════════════════════════════ */
-    function updateADCPanel(D, vin, state, tl, th) {
-      const col = state === 'safe' ? 'var(--plasma)' : state === 'high' ? 'var(--danger)' : 'var(--amber)';
-      document.getElementById('dval').textContent = D;
-      document.getElementById('dval').style.color = col;
-      document.getElementById('vval').textContent = vin.toFixed(3) + ' V';
-      document.getElementById('gfill').style.width = (D / 4095 * 100).toFixed(1) + '%';
-      document.getElementById('gfill').style.background = col;
-      document.getElementById('cbadge').textContent = pollCycles + ' cycles';
-      document.getElementById('cbadge').style.color = state === 'safe' ? 'var(--plasma)' : 'var(--danger)';
-    }
-
-    function updateLEDs(state) {
-      document.getElementById('ls').className = 'led' + (state === 'safe' ? ' on-safe' : '');
-      document.getElementById('lh').className = 'led' + (state === 'high' ? ' on-high' : '');
-      document.getElementById('ll').className = 'led' + (state === 'low' ? ' on-low' : '');
-      const t = document.getElementById('gtxt');
-      if (state === 'safe') { t.textContent = 'GPIO: SAFE'; t.style.color = 'var(--plasma)'; }
-      else if (state === 'high') { t.textContent = 'GPIO: HIGH ALERT !!'; t.style.color = 'var(--danger)'; }
-      else { t.textContent = 'GPIO: LOW ALERT !!'; t.style.color = 'var(--amber)'; }
-    }
-
-    /* ══════════════════════════════════════════════
-       LIVE EQUATION PROOFS
-    ══════════════════════════════════════════════ */
-    function updateProofs(D, vin, state, tl, th) {
-      const c = CORES[activeCore];
-      const tclk = 1000 / c.clk;
-      const texec = (pollCycles * tclk);
-      const tgpio = 2;
-      const tlat = texec + tgpio;
-      const talert = texec + tgpio;
-      const V = 3.3, I_bare = 0.001, I_rtos = 0.005;
-      const U = (texec / 500000000) * 100;
-
-      document.getElementById('pv1').textContent = `(${vin.toFixed(3)}/3.3)×4095 = ${D}`;
-      document.getElementById('pv2').textContent = `3.3/4096 = ${(3300 / 4096).toFixed(3)} mV/step`;
-
-      const eq3 = document.getElementById('peq3');
-      const pv3 = document.getElementById('pv3');
-      if (state === 'safe') {
-        pv3.textContent = `${tl}≤${D}≤${th} → SAFE (EQ7)`;
-        eq3.className = 'eqc safe';
-      } else if (state === 'high') {
-        pv3.textContent = `${D} > ${th} → BGT fires (EQ5)`;
-        eq3.className = 'eqc alert';
-      } else {
-        pv3.textContent = `${D} < ${tl} → BLT fires (EQ6)`;
-        eq3.className = 'eqc low';
-      }
-
-      document.getElementById('pv4').textContent = `${pollCycles}×${tclk.toFixed(2)}ns = ${texec.toFixed(2)}ns @ ${c.clk}MHz`;
-      // BREAK OUT EQ9
-      const ts = 1 * tclk;
-      const tcmp = 1 * tclk;
-      const tbr = (state === 'safe' ? 1 : 3) * tclk;
-      document.getElementById('pv5').innerHTML = `T_s(${ts.toFixed(1)}ns)+T_cmp(${tcmp.toFixed(1)}ns)+T_br(${tbr.toFixed(1)}ns) = ${(ts + tcmp + tbr).toFixed(2)}ns<br><span style="font-size:0.6rem;color:var(--dim)">* ARM branch predicted not taken = 1c, taken (alert) = 3c pipeline flush (assuming 0-wait SRAM register access)</span>`;
-      document.getElementById('pv6').textContent = `T_exec+T_GPIO = ${talert.toFixed(2)} ns total`;
-      const pbw = (V * I_bare * 1000).toFixed(1);
-      const prw = (V * I_rtos * 1000).toFixed(1);
-      document.getElementById('pv7').innerHTML = `
-    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:#333;margin-top:2px;"><span>P_bare=${pbw}mW</span><span>P_rtos=${prw}mW</span></div>
-    <div style="display:flex;gap:4px;height:4px;margin-top:2px;">
-      <div style="width:17%;background:var(--plasma)"></div><div style="width:83%;background:var(--danger)"></div>
-    </div>
-    <div style="font-size:0.65rem;color:var(--danger);text-align:right;font-weight:bold;">5× HIGHER POWER</div>
-  `;
-      document.getElementById('pv8').textContent = `U = ${U.toFixed(6)}%`;
-
-      ['peq1', 'peq2', 'peq4', 'peq5', 'peq6', 'peq7', 'peq8'].forEach(id => {
-        document.getElementById(id).className = 'eqc ' + (state === 'safe' ? 'safe' : state === 'high' ? 'alert' : 'low');
-      });
-    }
-
-    function clearAsm() {
-      ['A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'AA', 'AB', 'AC'].forEach(id => {
-        const e = document.getElementById(id);
-        if (e) { e.className = 'al'; e.querySelector('.arr').textContent = ''; }
-      });
-    }
-    function setL(id, cls) {
-      clearAsm();
-      const e = document.getElementById(id);
-      if (e) { e.className = 'al ' + cls; e.querySelector('.arr').textContent = '→'; }
-    }
-    const dly = ms => new Promise(r => setTimeout(r, ms));
-
-    async function playAsm(state) {
-      if (animBusy) return;
-      animBusy = true;
-      let c = 0;
-      setL('A0', 'act'); await dly(65); c++;
-      setL('A1', 'act'); await dly(55); c++;
-      setL('A2', 'act'); await dly(65); c++;
-      setL('A3', 'act'); await dly(65); c++;
-
-      if (state === 'high') {
-        setL('A3', 'ng'); await dly(55);
-        setL('AA', 'ng'); await dly(65); c++;
-        setL('AB', 'ng'); await dly(55); c++;
-        setL('AC', 'act'); await dly(45); c++;
-        document.getElementById('cbadge').textContent = c + ' cycles';
-        clearAsm(); animBusy = false; return;
-      }
-
-      setL('A4', 'act'); await dly(55); c++;
-      setL('A5', 'act'); await dly(65); c++;
-      setL('A6', 'act'); await dly(65); c++;
-
-      if (state === 'low') {
-        setL('A6', 'ng'); await dly(55);
-        setL('AA', 'ng'); await dly(65); c++;
-        setL('AB', 'ng'); await dly(55); c++;
-        setL('AC', 'act'); await dly(45); c++;
-        document.getElementById('cbadge').textContent = c + ' cycles';
-        clearAsm(); animBusy = false; return;
-      }
-
-      setL('A7', 'ok'); await dly(55); c++;
-      setL('A8', 'ok'); await dly(55); c++;
-      setL('A9', 'ok'); await dly(45); c++;
-      document.getElementById('cbadge').textContent = c + ' cycles';
-      clearAsm(); animBusy = false;
-    }
-
-    function getAlphaColors() { return CKEYS.map(k => k === activeCore ? CORES[k].color : CORES[k].alpha); }
-    function getCoreColors() { return CKEYS.map(k => CORES[k].color); }
-
-    function refreshChartColors() {
-      if (gA) { gA.data.datasets[0].backgroundColor = getAlphaColors(); gA.update('active'); }
-      if (gB) { gB.data.datasets[0].backgroundColor = getAlphaColors(); gB.update('active'); }
-      if (gE) { gE.data.datasets[0].backgroundColor = getAlphaColors(); gE.update('active'); }
-    }
-
-    function updateGC() {
-      if (!gC) return;
-      const c = CORES[activeCore];
-      const ns = (pollCycles * (1 / (c.clk * 1e6)) * 1e9).toFixed(1);
-      gC.data.datasets[0].data[1] = pollCycles;
-      gC.data.labels[1] = ['Poll Loop', '(' + pollCycles + 'c)'];
-      document.getElementById('gC-lbl').textContent = '▶ Min: 3c vs RTOS: 120c';
-      gC.update('active');
-
-      // NOP UPDATE
-      const nopCycles = 0.5 * c.clk * 1000000;
-      document.getElementById('sc-nop').textContent = (nopCycles / 1e6).toFixed(1) + 'M';
-      document.getElementById('sc-nop-lbl').textContent = `= 500ms × ${c.clk}MHz = ${(c.clk * 0.5).toFixed(1)}M cycles`;
-
-      const tclk = 1000 / c.clk;
-      const texec = (pollCycles * tclk);
-
-      // GF UPDATE (1-5 Scale mapping)
-      if (gF) {
-        // Map Latency: 500ns(M0) -> ~2.0, 71ns(M4) -> 5.0
-        const latScore = (Math.max(1, 5 - ((c.ns - 70) / 100))).toFixed(1);
-
-        // Map Power/Idle dynamically based on active core and execution time
-        const powerScore = (Math.max(1, 5 - (texec / 200))).toFixed(1);
-        const idleScore = "5.0"; // U is ~0.000%, rendering visually as a perfect 5.0 efficiency across all microcontrollers at 500ms
-
-        gF.data.datasets[0].data[0] = latScore;
-        gF.data.datasets[0].data[1] = idleScore;
-        gF.data.datasets[0].data[2] = powerScore;
-        gF.update();
-      }
-
-      // GP UPDATE
-      if (gP) {
-        const p_bare = 3.3; // Fixed linear 3.3mW tied to 1mA assumption in P=VxI section
-        gP.data.datasets[0].data[0] = p_bare;
-        gP.update();
-      }
-
-      // GU UPDATE
-      if (gU) {
-        const U = (texec / 500000000) * 100;
-        gU.data.datasets[0].data = [U, 100 - U];
-        gU.data.datasets[0].backgroundColor = [c.color, '#e0e0e0'];
-        gU.update();
-        document.getElementById('gU-note').textContent = `Active: ${texec.toFixed(1)}ns vs Idle: 500ms. CPU effectively 100% idle.`;
-      }
-
-      document.getElementById('gC-note').textContent =
-        'Bare-metal path: ' + pollCycles + ' cycles × ' + (1000 / c.clk).toFixed(2) + 'ns = ' + ns +
-        'ns  |  RTOS total: 120 cycles × ' + (1000 / c.clk).toFixed(2) + 'ns = ' +
-        (120 * (1 / (c.clk * 1e6)) * 1e9).toFixed(1) + 'ns  →  RTOS is ' + Math.round(120 / pollCycles) + '× slower';
-    }
-
-    function updateGE() {
-      if (!gE) return;
-      const c = CORES[activeCore];
-      const data = CKEYS.map(k => (pollCycles * (1 / (CORES[k].clk * 1e6)) * 1e9).toFixed(2));
-      gE.data.datasets[0].data = data;
-      gE.data.datasets[0].backgroundColor = getAlphaColors();
-      gE.update('active');
-
-      const myNs = (pollCycles * (1 / (c.clk * 1e6)) * 1e9).toFixed(1);
-      document.getElementById('gE-lbl').textContent = 'EQ8: ' + pollCycles + '×T_clock → ' + myNs + 'ns on ' + c.name;
-      document.getElementById('gE-note').textContent =
-        'M4 (168MHz) is ' + Math.round((pollCycles * (1 / (CORES.m0.clk * 1e6)) * 1e9) / (pollCycles * (1 / (CORES.m4.clk * 1e6)) * 1e9)) + '× faster than M0 (32MHz).';
-    }
-
-    function updateGraphNotes() {
-      const c = CORES[activeCore];
-      document.getElementById('gA-note').textContent =
-        c.full + ' interrupt entry: ' + c.cycles + ' clock cycles. Cortex-M3/M4 achieve 12-cycle entry via hardware register stacking.';
-      document.getElementById('gB-note').textContent =
-        c.full + ' latency: ' + c.ns.toFixed(1) + ' ns at ' + c.clk + ' MHz.';
-    }
-
-    function initCharts() {
-      const tOpts = { color: '#555', font: { size: 9, family: "'Courier Prime',monospace" } };
-      const gridColor = '#eeeeee';
-
-      gA = new Chart(document.getElementById('gA').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: CKEYS.map(k => CORES[k].name),
-          datasets: [{ data: [16, 15, 12, 12], backgroundColor: getAlphaColors(), borderColor: getCoreColors(), borderWidth: 1, borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { min: 10, max: 18, ticks: tOpts, grid: { color: gridColor } }, x: { ticks: tOpts, grid: { display: false } } },
-          animation: { duration: 500 }
-        }
-      });
-
-      gB = new Chart(document.getElementById('gB').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: CKEYS.map(k => CORES[k].name),
-          datasets: [{ data: [500.0, 312.5, 166.7, 71.4], backgroundColor: getAlphaColors(), borderColor: getCoreColors(), borderWidth: 1, borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: v => v + ' ns', ...tOpts }, grid: { color: gridColor } }, x: { ticks: tOpts, grid: { display: false } } },
-          animation: { duration: 500 }
-        }
-      });
-
-      gF = new Chart(document.getElementById('gF').getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels: ['Latency', 'Idle CPU %', 'Power Eff.', 'Complexity', 'Debug Ease'],
-          datasets: [
-            { label: 'Proposed ASM', data: [5, 5, 5, 4, 3], borderColor: '#007700', backgroundColor: 'rgba(0,119,0,0.2)', borderWidth: 1.5 },
-            { label: 'RTOS (Int)', data: [1, 1, 1, 2, 2], borderColor: '#cc0000', backgroundColor: 'rgba(204,0,0,0.2)', borderWidth: 1.5 },
-            { label: 'Standard C', data: [3, 2, 3, 4, 5], borderColor: '#bb6600', backgroundColor: 'rgba(187,102,0,0.2)', borderWidth: 1.5, borderDash: [3, 3] }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: true, position: 'right', labels: { boxWidth: 10, font: { size: 8 } } } },
-          scales: { r: { min: 0, max: 5, ticks: { display: false, stepSize: 1 }, pointLabels: { font: { size: 8, family: "'Courier Prime',monospace" } } } }
-        }
-      });
-
-      gU = new Chart(document.getElementById('gU').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Active', 'Idle'],
-          datasets: [{ data: [0.01, 99.99], backgroundColor: ['#000', '#eee'], borderWidth: 0 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.toFixed(6) + '%' } } },
-          cutout: '60%', animation: { duration: 500 }
-        }
-      });
-
-      gC = new Chart(document.getElementById('gC').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: [['Min Check', '(CMP+BGT)'], ['Poll Loop', '(10c)'], ['HW IRQ', 'Entry (12c)'], ['ISR Context', 'Save (8c)'], ['OS Sched', 'Overhead'], ['Total RTOS', 'Path']],
-          datasets: [{ data: [3, 10, 12, 8, 87, 120], backgroundColor: ['#0099ff', '#007700', '#0055ff', '#bb6600', '#cc0000', '#880000'], borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { ticks: tOpts, grid: { color: gridColor } }, x: { ticks: { ...tOpts, font: { size: 8, family: "'Courier Prime',monospace" } }, grid: { display: false } } }
-        }
-      });
-
-      gP = new Chart(document.getElementById('gP').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['Bare-Metal', 'RTOS (Active)', 'RTOS (Idle)'],
-          datasets: [{ data: [3.3, 16.5, 9.9], backgroundColor: ['#007700', '#cc0000', '#bb6600'], borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: v => v + ' mW', ...tOpts }, grid: { color: gridColor } }, x: { ticks: tOpts, grid: { display: false } } }
-        }
-      });
-
-      gD = new Chart(document.getElementById('gD').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['Standard OS', 'Lean RTOS', 'Bare-Metal ASM'],
-          datasets: [{ data: [100, 1.0, 0.5], backgroundColor: ['#cc0000', '#bb6600', '#007700'], borderRadius: 4 }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: v => v + '%', ...tOpts }, grid: { color: gridColor } }, x: { ticks: tOpts, grid: { display: false } } }
-        }
-      });
-
-      gE = new Chart(document.getElementById('gE').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: CKEYS.map(k => CORES[k].name),
-          datasets: [{
-            data: CKEYS.map(k => (10 * (1 / (CORES[k].clk * 1e6)) * 1e9).toFixed(2)),
-            backgroundColor: getAlphaColors(), borderColor: getCoreColors(), borderWidth: 1, borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'T_exec = ' + ctx.parsed.y + ' ns' } } },
-          scales: { y: { ticks: { callback: v => v + ' ns', ...tOpts }, grid: { color: gridColor } }, x: { ticks: tOpts, grid: { display: false } } },
-          animation: { duration: 500 }
-        }
-      });
-
-      sc = new Chart(document.getElementById('schart').getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [
-            { data: [], borderColor: '#007700', borderWidth: 1.5, pointRadius: 2, pointBackgroundColor: [], tension: 0.3, fill: false },
-            { data: [], borderColor: '#cc0000', borderDash: [5, 4], borderWidth: 1, pointRadius: 0, fill: false },
-            { data: [], borderColor: '#bb6600', borderDash: [5, 4], borderWidth: 1, pointRadius: 0, fill: false }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } },
-          scales: { x: { display: false }, y: { min: 0, max: 4095, ticks: { maxTicksLimit: 4, ...tOpts }, grid: { color: gridColor } } }
-        }
-      });
-    }
-
-    function switchSub(id, btn) {
-      document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('sub-sim').style.display = id === 'sim' ? '' : 'none';
-      document.getElementById('sub-eqs').style.display = id === 'eqs' ? '' : 'none';
-    }
-
-    const CALCS = [
-      {
-        num: 'EQ1', name: 'ADC Digital Output', formula: 'D = (Vin/Vref) × (2ⁿ − 1)',
-        inputs: [{ id: 'vin1', lbl: 'Vin (V)', def: '1.65' }, { id: 'vref1', lbl: 'Vref (V)', def: '3.3' }, { id: 'n1', lbl: 'n (bits)', def: '12' }],
-        calc: v => { const d = (parseFloat(v[0]) / parseFloat(v[1])) * (Math.pow(2, parseInt(v[2])) - 1); return 'D = ' + Math.round(d); },
-        steps: '(1.65/3.3)×(4096−1) = 0.5×4095 = 2047'
-      },
-      {
-        num: 'EQ2', name: 'ADC Resolution', formula: 'Res = Vref / 2ⁿ',
-        inputs: [{ id: 'vref2', lbl: 'Vref (V)', def: '3.3' }, { id: 'n2', lbl: 'n (bits)', def: '12' }],
-        calc: v => { const r = (parseFloat(v[0]) / Math.pow(2, parseInt(v[1])) * 1000); return 'Res = ' + r.toFixed(4) + ' mV/step'; },
-        steps: '3.3/4096 = 0.000806V = 0.806 mV/step'
-      },
-      {
-        num: 'EQ3', name: 'Sampling Frequency', formula: 'fs = 1 / Ts',
-        inputs: [{ id: 'ts3', lbl: 'Ts (ms)', def: '500' }],
-        calc: v => { return 'fs = ' + (1000 / parseFloat(v[0])).toFixed(3) + ' Hz'; },
-        steps: '1/0.5s = 2 Hz (500ms tick interval)'
-      },
-      {
-        num: 'EQ4', name: 'Nyquist Condition', formula: 'fs ≥ 2 × fmax',
-        inputs: [{ id: 'fs4', lbl: 'fs (Hz)', def: '2' }, { id: 'fm4', lbl: 'fmax (Hz)', def: '0.5' }],
-        calc: v => { const ok = parseFloat(v[0]) >= 2 * parseFloat(v[1]); return (ok ? '✓ SATISFIED' : '✗ ALIASING RISK'); },
-        steps: 'fs=2Hz ≥ 2×0.5Hz=1Hz → Nyquist satisfied ✓'
-      },
-      {
-        num: 'EQ5', name: 'Upper Threshold', formula: 'D > T_HIGH → alert',
-        inputs: [{ id: 'd5', lbl: 'D', def: '3500' }, { id: 'th5', lbl: 'T_HIGH', def: '3200' }],
-        calc: v => { const fire = parseInt(v[0]) > parseInt(v[1]); return v[0] + ' > ' + v[1] + ' → ' + (fire ? 'BGT taken' : 'safe'); },
-        steps: '3500 > 3200 → BGT fires'
-      },
-      {
-        num: 'EQ6', name: 'Lower Threshold', formula: 'D < T_LOW → alert',
-        inputs: [{ id: 'd6', lbl: 'D', def: '500' }, { id: 'tl6', lbl: 'T_LOW', def: '800' }],
-        calc: v => { const fire = parseInt(v[0]) < parseInt(v[1]); return v[0] + ' < ' + v[1] + ' → ' + (fire ? 'BLT taken' : 'safe'); },
-        steps: '500 < 800 → BLT fires'
-      },
-      {
-        num: 'EQ7', name: 'Safe Condition', formula: 'T_LOW ≤ D ≤ T_HIGH',
-        inputs: [{ id: 'd7', lbl: 'D', def: '2048' }, { id: 'tl7', lbl: 'T_LOW', def: '800' }, { id: 'th7', lbl: 'T_HIGH', def: '3200' }],
-        calc: v => { const safe = parseInt(v[0]) >= parseInt(v[1]) && parseInt(v[0]) <= parseInt(v[2]); return parseInt(v[1]) + '≤' + v[0] + '≤' + parseInt(v[2]) + ' → ' + (safe ? 'SAFE' : 'ALERT'); },
-        steps: '800≤2048≤3200 → SAFE'
-      },
-      {
-        num: 'EQ8', name: 'CPU Execution Time', formula: 'T_exec = N_cycles × T_clock',
-        inputs: [{ id: 'n8', lbl: 'N_cycles', def: '10' }, { id: 'f8', lbl: 'fclock (MHz)', def: '72' }],
-        calc: v => { const t = (parseInt(v[0]) / (parseFloat(v[1]) * 1e6)) * 1e9; return 'T_exec = ' + t.toFixed(2) + ' ns'; },
-        steps: '10 × (1/72MHz) = 138.9 ns'
-      },
-      {
-        num: 'EQ9', name: 'Polling Loop Latency', formula: 'T_latency = T_sample + T_cmp + T_branch',
-        inputs: [{ id: 'ts9', lbl: 'T_sample(ns)', def: '27.78' }, { id: 'tc9', lbl: 'T_cmp(ns)', def: '13.89' }, { id: 'tb9', lbl: 'T_branch(ns)', def: '13.89' }],
-        calc: v => { const t = parseFloat(v[0]) + parseFloat(v[1]) + parseFloat(v[2]); return 'T_latency = ' + t.toFixed(2) + ' ns'; },
-        steps: '27.78 + 13.89 + 13.89 = 55.56 ns (@ 72MHz)'
-      },
-      {
-        num: 'EQ10', name: 'GPIO Activation Time', formula: 'T_alert = T_exec + T_GPIO',
-        inputs: [{ id: 'te10', lbl: 'T_exec(ns)', def: '138.9' }, { id: 'tg10', lbl: 'T_GPIO(ns)', def: '2' }],
-        calc: v => { return 'T_alert = ' + (parseFloat(v[0]) + parseFloat(v[1])).toFixed(2) + ' ns'; },
-        steps: '138.9 + 2 = 140.9 ns vs ~1666+ ns RTOS'
-      },
-      {
-        num: 'EQ11', name: 'Power Consumption', formula: 'P = V × I',
-        inputs: [{ id: 'v11', lbl: 'V (volts)', def: '3.3' }, { id: 'i11', lbl: 'I (mA)', def: '1.0' }],
-        calc: v => { return 'P = ' + (parseFloat(v[0]) * parseFloat(v[1])).toFixed(2) + ' mW'; },
-        steps: 'Bare-metal: 3.3×1mA=3.3mW'
-      },
-      {
-        num: 'EQ12', name: 'CPU Utilization', formula: 'U = T_active / T_total',
-        inputs: [{ id: 'ta12', lbl: 'T_active(ns)', def: '138.9' }, { id: 'tt12', lbl: 'T_total(ms)', def: '500' }],
-        calc: v => { const u = (parseFloat(v[0]) / (parseFloat(v[1]) * 1e6)) * 100; return 'U = ' + u.toFixed(6) + '%'; },
-        steps: '138.9ns / 500,000,000ns = ~0%'
-      }
-    ];
-
-    function buildCalcCards() {
-      const grid = document.getElementById('calc-grid');
-      CALCS.forEach((eq, i) => {
-        const div = document.createElement('div');
-        div.className = 'calc-card';
-        const inpHtml = eq.inputs.map(inp => `<div class="ci-inp"><label>${inp.lbl}</label><input id="${inp.id}" value="${inp.def}" oninput="runCalc(${i})"></div>`).join('');
-        div.innerHTML = `<div class="calc-num">${eq.num}</div><div class="calc-name">${eq.name}</div><div class="calc-formula">${eq.formula}</div><div class="calc-inputs">${inpHtml}</div><div class="calc-result" id="cr-${i}">—</div><div class="calc-steps">${eq.steps}</div>`;
-        grid.appendChild(div);
-        setTimeout(() => runCalc(i), 50);
-      });
-    }
-
-    function runCalc(i) {
-      const eq = CALCS[i];
-      const vals = eq.inputs.map(inp => { const el = document.getElementById(inp.id); return el ? el.value : '0'; });
-      try { document.getElementById('cr-' + i).textContent = eq.calc(vals); } catch (e) { document.getElementById('cr-' + i).textContent = 'invalid input'; }
-    }
-  </script>
-</body>
-
+      <footer>
+        <p>Built for learning by Hamza Rizvi &amp; Samuel Okegbile.</p>
+        <p>
+          <a
+            href="https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/beginner-guide-on-interrupt-latency-and-interrupt-latency-of-the-arm-cortex-m-processors"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Arm: exception-entry reference</a
+          >
+          · No fabricated RTOS, memory, or power benchmarks.
+        </p>
+      </footer>
+    </main>
+    <div id="notice" role="status" aria-live="polite"></div>
+  </body>
 </html>

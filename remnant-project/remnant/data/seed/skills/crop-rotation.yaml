@@ -1,0 +1,11 @@
+id: crop-rotation
+title: Crop Rotation
+domain: food
+civilization_score: 80
+requires: [basic-agriculture, soil-understanding]
+unlocks: [cover-cropping, three-field-system, nitrogen-fixation-awareness]
+summary: >
+  Rotating which crops are planted in a field each season to prevent
+  soil depletion, reduce pests, and increase long-term yields.
+difficulty: 2
+time_to_learn_days: 30

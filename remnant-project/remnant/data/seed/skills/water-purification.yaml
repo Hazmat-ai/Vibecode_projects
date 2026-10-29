@@ -1,0 +1,11 @@
+id: water-purification
+title: Water Purification
+domain: medicine
+civilization_score: 95
+requires: [fire-making]
+unlocks: [food-preservation-fermentation, wound-care, soap-making]
+summary: >
+  Ability to purify water through boiling, filtration, and solar disinfection,
+  making it safe to drink from virtually any natural source.
+difficulty: 1
+time_to_learn_days: 1

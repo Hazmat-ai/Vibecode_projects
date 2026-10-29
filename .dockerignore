@@ -1,0 +1,7 @@
+.git
+node_modules
+remnant-project
+docs
+APP2.zip
+*.patch
+test-results
